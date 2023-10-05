@@ -1,4 +1,4 @@
-import {info, warning} from '@actions/core'
+import {getInput, info, warning} from '@actions/core'
 // eslint-disable-next-line camelcase
 import {context as github_context} from '@actions/github'
 import {octokit} from './octokit'
@@ -7,7 +7,7 @@ import {octokit} from './octokit'
 const context = github_context
 const repo = context.repo
 
-export const COMMENT_GREETING = `<img src="https://avatars.githubusercontent.com/in/347564?s=41" alt="Image description" width="20" height="20">   CodeRabbit`
+export const COMMENT_GREETING = `${getInput('bot_icon')}   CodeRabbit`
 
 export const COMMENT_TAG =
   '<!-- This is an auto-generated comment by OSS CodeRabbit -->'
@@ -24,8 +24,8 @@ export const IN_PROGRESS_START_TAG =
 export const IN_PROGRESS_END_TAG =
   '<!-- end of auto-generated comment: summarize review in progress by OSS CodeRabbit -->'
 
-export const DESCRIPTION_START_TAG = `
-<!-- This is an auto-generated comment: release notes by OSS CodeRabbit -->`
+export const DESCRIPTION_START_TAG =
+  '<!-- This is an auto-generated comment: release notes by OSS CodeRabbit -->'
 export const DESCRIPTION_END_TAG =
   '<!-- end of auto-generated comment: release notes by OSS CodeRabbit -->'
 
@@ -93,7 +93,7 @@ ${tag}`
 
   removeContentWithinTags(content: string, startTag: string, endTag: string) {
     const start = content.indexOf(startTag)
-    const end = content.indexOf(endTag)
+    const end = content.lastIndexOf(endTag)
     if (start >= 0 && end >= 0) {
       return content.slice(0, start) + content.slice(end + endTag.length)
     }
@@ -155,7 +155,7 @@ ${tag}`
         DESCRIPTION_START_TAG,
         DESCRIPTION_END_TAG
       )
-      const newDescription = `${description}${DESCRIPTION_START_TAG}\n${messageClean}\n${DESCRIPTION_END_TAG}`
+      const newDescription = `${description}\n${DESCRIPTION_START_TAG}\n${messageClean}\n${DESCRIPTION_END_TAG}`
       await octokit.pulls.update({
         owner: repo.owner,
         repo: repo.repo,
